@@ -136,9 +136,9 @@ int main(void)
 }
 void Muestra(void)
 {
-	if(msTicks>10)
+	if(msTicks>2)
 	{
-		if(posicion_buffer_in<100)
+		if(posicion_buffer_in<250)
 		{
 			HAL_ADC_Start(&hadc1);
 			LECTURA=HAL_ADC_GetValue(&hadc1);
@@ -153,11 +153,11 @@ void Muestra(void)
 			buffer_adc[posicion_buffer_in]=LECTURA;
 			posicion_buffer_in++;
 
-			HAL_GPIO_TogglePin(GPIOG, LD3_Pin);
+			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
 		}
 		else
 		{
-			if(posicion_buffer_out<100)
+			if(posicion_buffer_out<250)
 			{
 			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
 			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adc[posicion_buffer_out]);
@@ -167,7 +167,7 @@ void Muestra(void)
 			{
 				posicion_buffer_out=0;
 			}
-			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
+			HAL_GPIO_TogglePin(GPIOG, LD3_Pin);
 		}
 		msTicks=0;
 	}
@@ -239,7 +239,7 @@ void SystemClock_Config(void)
 
     /**Configure the Systick interrupt time 
     */
-  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/100000);
+  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000000);
 
     /**Configure the Systick 
     */
