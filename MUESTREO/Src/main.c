@@ -46,10 +46,11 @@
 #include "ltdc.h"
 #include "tim.h"
 #include "gpio.h"
+#include "complex.h"
 
 
 /* USER CODE BEGIN Includes */
-
+#define MAX 200
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -66,6 +67,13 @@ uint8_t posicion_buffer_out=0u;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
+uint32_t log2(int16_t N);
+uint32_t check(int16_t n);
+uint32_t reverse(uint16_t N, uint16_t n);
+void ordina(double complex* f1, uint16_t N);
+void transform(double complex* f, int N);
+
+
 void SystemClock_Config(void);
 void Muestra(void);
 
@@ -136,20 +144,13 @@ int main(void)
 }
 void Muestra(void)
 {
-	if(msTicks>2)
+	if(msTicks>1)
 	{
-		if(posicion_buffer_in<250)
+		if(posicion_buffer_in<2)
 		{
 			HAL_ADC_Start(&hadc1);
 			LECTURA=HAL_ADC_GetValue(&hadc1);
-			/*if((LECTURA=HAL_ADC_GetValue(&hadc1))<2000)
-			{
-				HAL_GPIO_WritePin(GPIOG,LD4_Pin, GPIO_PIN_SET);
-			}
-			else
-			{
-				HAL_GPIO_WritePin(GPIOG,LD4_Pin, GPIO_PIN_RESET);
-			}*/
+
 			buffer_adc[posicion_buffer_in]=LECTURA;
 			posicion_buffer_in++;
 
@@ -157,7 +158,7 @@ void Muestra(void)
 		}
 		else
 		{
-			if(posicion_buffer_out<250)
+			if(posicion_buffer_out<2)
 			{
 			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
 			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adc[posicion_buffer_out]);
@@ -166,6 +167,7 @@ void Muestra(void)
 			else
 			{
 				posicion_buffer_out=0;
+				posicion_buffer_in=0;
 			}
 			HAL_GPIO_TogglePin(GPIOG, LD3_Pin);
 		}
