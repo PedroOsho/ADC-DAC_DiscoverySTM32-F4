@@ -61,9 +61,16 @@
 LTDC_HandleTypeDef hltdc;
 uint32_t LECTURA;
 uint32_t msTicks;
-uint16_t buffer_adc[1000];
+uint16_t buffer_adcIn[1000];
+uint16_t buffer_adcIn2[1000];
+
+uint16_t buffer_adcOut[1000];
+uint16_t buffer_adcOut2[1000];
+
 uint8_t posicion_buffer_in=0u;
+uint8_t posicion_buffer_in2=0u;
 uint8_t posicion_buffer_out=0u;
+uint8_t posicion_buffer_out2=0u;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -150,32 +157,68 @@ int main(void)
 }
 void Muestra(void)
 {
-	if(msTicks>1)
+	if(msTicks>22)
 	{
-		if(posicion_buffer_in<2)
+		if(posicion_buffer_in<250)
 		{
+
+			buffer_adcOut[posicion_buffer_in]=buffer_adcIn[posicion_buffer_in];
+
+			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut[posicion_buffer_out]);
+			buffer_adcIn[posicion_buffer_in]=LECTURA;
+
 			HAL_ADC_Start(&hadc1);
 			LECTURA=HAL_ADC_GetValue(&hadc1);
 
-			buffer_adc[posicion_buffer_in]=LECTURA;
+			posicion_buffer_out++;
 			posicion_buffer_in++;
+
+			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
+		}
+		else if(posicion_buffer_in>=250 && posicion_buffer_in2<250)
+		{
+
+			buffer_adcOut2[posicion_buffer_in2]=buffer_adcIn2[posicion_buffer_in2];
+
+			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut2[posicion_buffer_out2]);
+
+			buffer_adcIn2[posicion_buffer_in2]=LECTURA;
+
+			HAL_ADC_Start(&hadc1);
+			LECTURA=HAL_ADC_GetValue(&hadc1);
+
+			posicion_buffer_in2++;
+			posicion_buffer_out2++;
 
 			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
 		}
 		else
 		{
-			if(posicion_buffer_out<2)
+			posicion_buffer_out=0;
+			posicion_buffer_in=0;
+			posicion_buffer_out2=0;
+			posicion_buffer_in2=0;
+		/*	if(posicion_buffer_out<250)
 			{
 			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
-			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adc[posicion_buffer_out]);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut[posicion_buffer_out]);
 			posicion_buffer_out++;
 			}
-			else
+			else if(posicion_buffer_out>=250 && posicion_buffer_out2<250)
 			{
+				HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut2[posicion_buffer_out2]);
+				posicion_buffer_out2++;
+			}
+			else{
 				posicion_buffer_out=0;
 				posicion_buffer_in=0;
+				posicion_buffer_out2=0;
+				posicion_buffer_in2=0;
 			}
-			HAL_GPIO_TogglePin(GPIOG, LD3_Pin);
+			HAL_GPIO_TogglePin(GPIOG, LD3_Pin);*/
 		}
 		msTicks=0;
 	}
