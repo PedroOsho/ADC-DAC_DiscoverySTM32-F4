@@ -61,6 +61,10 @@
 LTDC_HandleTypeDef hltdc;
 uint32_t LECTURA;
 uint32_t msTicks;
+
+double complex totalBuffer[1250];
+uint16_t totalBufferPosition=0;
+
 uint16_t buffer_adcIn[250];
 uint16_t buffer_adcIn2[250];
 uint16_t buffer_adcIn3[250];
@@ -98,6 +102,7 @@ uint16_t check(uint16_t n);
 uint16_t reverse(uint16_t N, uint16_t n);
 void ordina(double complex* f1, uint16_t N);
 void transform(double complex* f, uint16_t N);
+void FFT(double complex* f, uint16_t N, double d);
 
 uint16_t polarReal(uint16_t beta, uint16_t teta);
 uint16_t polarImaginario(uint16_t beta, uint16_t teta);
@@ -170,134 +175,6 @@ int main(void)
   /* USER CODE END 3 */
 
 }
-void Muestra(void)
-{
-	if(msTicks>22)
-	{
-		if(posicion_buffer_in<250)
-		{
-
-			buffer_adcOut[posicion_buffer_in]=buffer_adcIn[posicion_buffer_in];
-
-			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
-			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut[posicion_buffer_out]);
-
-
-			HAL_ADC_Start(&hadc1);
-			LECTURA=HAL_ADC_GetValue(&hadc1);
-			buffer_adcIn[posicion_buffer_in]=LECTURA;
-
-			posicion_buffer_out++;
-			posicion_buffer_in++;
-
-			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
-		}
-		else if(posicion_buffer_in>=250 && posicion_buffer_in2<250)
-		{
-
-			buffer_adcOut2[posicion_buffer_in2]=buffer_adcIn2[posicion_buffer_in2];
-
-			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
-			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut2[posicion_buffer_out2]);
-
-
-			HAL_ADC_Start(&hadc1);
-			LECTURA=HAL_ADC_GetValue(&hadc1);
-			buffer_adcIn2[posicion_buffer_in2]=LECTURA;
-
-			posicion_buffer_in2++;
-			posicion_buffer_out2++;
-
-			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
-		}
-		else if(posicion_buffer_in2>=250 && posicion_buffer_in3<250)
-		{
-			buffer_adcOut3[posicion_buffer_in3]=buffer_adcIn3[posicion_buffer_in3];
-
-			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
-			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut3[posicion_buffer_out3]);
-
-
-			HAL_ADC_Start(&hadc1);
-			LECTURA=HAL_ADC_GetValue(&hadc1);
-			buffer_adcIn3[posicion_buffer_in3]=LECTURA;
-
-			posicion_buffer_in3++;
-			posicion_buffer_out3++;
-
-			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
-		}
-		else if(posicion_buffer_in3>=250 && posicion_buffer_in4<250)
-		{
-			buffer_adcOut4[posicion_buffer_in4]=buffer_adcIn4[posicion_buffer_in4];
-
-			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
-			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut4[posicion_buffer_out4]);
-
-
-			HAL_ADC_Start(&hadc1);
-			LECTURA=HAL_ADC_GetValue(&hadc1);
-			buffer_adcIn4[posicion_buffer_in4]=LECTURA;
-
-			posicion_buffer_in4++;
-			posicion_buffer_out4++;
-		}
-		else if(posicion_buffer_in4>=250 && posicion_buffer_in5<250)
-		{
-			buffer_adcOut5[posicion_buffer_in5]=buffer_adcIn5[posicion_buffer_in5];
-
-			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
-			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut5[posicion_buffer_out5]);
-
-
-			HAL_ADC_Start(&hadc1);
-			LECTURA=HAL_ADC_GetValue(&hadc1);
-			buffer_adcIn5[posicion_buffer_in5]=LECTURA;
-
-			posicion_buffer_in5++;
-			posicion_buffer_out5++;
-
-		}
-		else
-		{
-			posicion_buffer_out=0;
-			posicion_buffer_in=0;
-			posicion_buffer_out2=0;
-			posicion_buffer_in2=0;
-			posicion_buffer_out3=0;
-			posicion_buffer_in3=0;
-			posicion_buffer_out4=0;
-			posicion_buffer_in4=0;
-			posicion_buffer_out5=0;
-			posicion_buffer_in5=0;
-
-
-		/*	if(posicion_buffer_out<250)
-			{
-			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
-			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut[posicion_buffer_out]);
-			posicion_buffer_out++;
-			}
-			else if(posicion_buffer_out>=250 && posicion_buffer_out2<250)
-			{
-				HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
-				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut2[posicion_buffer_out2]);
-				posicion_buffer_out2++;
-			}
-			else{
-				posicion_buffer_out=0;
-				posicion_buffer_in=0;
-				posicion_buffer_out2=0;
-				posicion_buffer_in2=0;
-			}
-			HAL_GPIO_TogglePin(GPIOG, LD3_Pin);*/
-		}
-		msTicks=0;
-	}
-
-}
-
-
 
 
 
@@ -387,6 +264,156 @@ void FFT(double complex* f, uint16_t N, double d)
 
 
 
+
+
+
+
+
+
+void Muestra(void)
+{
+	if(msTicks>22)
+	{
+		if(posicion_buffer_in<250)
+		{
+
+			buffer_adcOut[posicion_buffer_in]=buffer_adcIn[posicion_buffer_in];
+
+			totalBuffer[totalBufferPosition]=buffer_adcOut[posicion_buffer_in];
+
+			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut[posicion_buffer_out]);
+
+
+			HAL_ADC_Start(&hadc1);
+			LECTURA=HAL_ADC_GetValue(&hadc1);
+			buffer_adcIn[posicion_buffer_in]=LECTURA;
+
+			posicion_buffer_out++;
+			posicion_buffer_in++;
+			totalBufferPosition++;
+
+			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
+		}
+		else if(posicion_buffer_in>=250 && posicion_buffer_in2<250)
+		{
+
+			buffer_adcOut2[posicion_buffer_in2]=buffer_adcIn2[posicion_buffer_in2];
+
+			totalBuffer[totalBufferPosition]=buffer_adcOut2[posicion_buffer_in2];
+
+			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut2[posicion_buffer_out2]);
+
+
+			HAL_ADC_Start(&hadc1);
+			LECTURA=HAL_ADC_GetValue(&hadc1);
+			buffer_adcIn2[posicion_buffer_in2]=LECTURA;
+
+			posicion_buffer_in2++;
+			posicion_buffer_out2++;
+			totalBufferPosition++;
+
+			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
+		}
+		else if(posicion_buffer_in2>=250 && posicion_buffer_in3<250)
+		{
+			buffer_adcOut3[posicion_buffer_in3]=buffer_adcIn3[posicion_buffer_in3];
+
+			totalBuffer[totalBufferPosition]=buffer_adcOut3[posicion_buffer_in3];
+
+			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut3[posicion_buffer_out3]);
+
+
+			HAL_ADC_Start(&hadc1);
+			LECTURA=HAL_ADC_GetValue(&hadc1);
+			buffer_adcIn3[posicion_buffer_in3]=LECTURA;
+
+			posicion_buffer_in3++;
+			posicion_buffer_out3++;
+			totalBufferPosition++;
+
+			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
+		}
+		else if(posicion_buffer_in3>=250 && posicion_buffer_in4<250)
+		{
+			buffer_adcOut4[posicion_buffer_in4]=buffer_adcIn4[posicion_buffer_in4];
+
+			totalBuffer[totalBufferPosition]=buffer_adcOut4[posicion_buffer_in4];
+
+			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut4[posicion_buffer_out4]);
+
+
+			HAL_ADC_Start(&hadc1);
+			LECTURA=HAL_ADC_GetValue(&hadc1);
+			buffer_adcIn4[posicion_buffer_in4]=LECTURA;
+
+			posicion_buffer_in4++;
+			posicion_buffer_out4++;
+			totalBufferPosition++;
+
+		}
+		else if(posicion_buffer_in4>=250 && posicion_buffer_in5<250)
+		{
+			buffer_adcOut5[posicion_buffer_in5]=buffer_adcIn5[posicion_buffer_in5];
+
+			totalBuffer[totalBufferPosition]=buffer_adcOut5[posicion_buffer_in5];
+
+			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut5[posicion_buffer_out5]);
+
+
+			HAL_ADC_Start(&hadc1);
+			LECTURA=HAL_ADC_GetValue(&hadc1);
+			buffer_adcIn5[posicion_buffer_in5]=LECTURA;
+
+			posicion_buffer_in5++;
+			posicion_buffer_out5++;
+			totalBufferPosition++;
+
+		}
+		else
+		{
+			FFT(totalBuffer, 1250, 0.000022);
+			posicion_buffer_out=0;
+			posicion_buffer_in=0;
+			posicion_buffer_out2=0;
+			posicion_buffer_in2=0;
+			posicion_buffer_out3=0;
+			posicion_buffer_in3=0;
+			posicion_buffer_out4=0;
+			posicion_buffer_in4=0;
+			posicion_buffer_out5=0;
+			posicion_buffer_in5=0;
+			totalBufferPosition=0;
+
+
+		/*	if(posicion_buffer_out<250)
+			{
+			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut[posicion_buffer_out]);
+			posicion_buffer_out++;
+			}
+			else if(posicion_buffer_out>=250 && posicion_buffer_out2<250)
+			{
+				HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+				HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut2[posicion_buffer_out2]);
+				posicion_buffer_out2++;
+			}
+			else{
+				posicion_buffer_out=0;
+				posicion_buffer_in=0;
+				posicion_buffer_out2=0;
+				posicion_buffer_in2=0;
+			}
+			HAL_GPIO_TogglePin(GPIOG, LD3_Pin);*/
+		}
+		msTicks=0;
+	}
+
+}
 
 
 
