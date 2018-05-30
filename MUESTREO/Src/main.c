@@ -46,7 +46,11 @@
 #include "ltdc.h"
 #include "tim.h"
 #include "gpio.h"
-#include "complex.h"
+#include <complex.h>
+#include <math.h>
+
+#define MAX 200
+
 
 
 /* USER CODE BEGIN Includes */
@@ -67,12 +71,14 @@ uint8_t posicion_buffer_out=0u;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
-uint32_t log2(int16_t N);
-uint32_t check(int16_t n);
-uint32_t reverse(uint16_t N, uint16_t n);
+uint16_t Log2(uint16_t N);
+uint16_t check(uint16_t n);
+uint16_t reverse(uint16_t N, uint16_t n);
 void ordina(double complex* f1, uint16_t N);
-void transform(double complex* f, int N);
+void transform(double complex* f, uint16_t N);
 
+uint16_t polarReal(uint16_t beta, uint16_t teta);
+uint16_t polarImaginario(uint16_t beta, uint16_t teta);
 
 void SystemClock_Config(void);
 void Muestra(void);
@@ -175,6 +181,101 @@ void Muestra(void)
 	}
 
 }
+
+
+
+
+
+
+
+
+uint16_t Log2(uint16_t N)    //funzione per calcolare il logaritmo in base 2 di un intero
+{
+  uint8_t k = N, i = 0;
+  while(k) {
+    k >>= 1;
+    i++;
+  }
+  return i - 1;
+}
+
+uint16_t check(uint16_t n)    //usato per controllare se il numero di componenti del vettore di input è una potenza di 2
+{
+  return n > 0 && (n & (n - 1)) == 0;
+}
+
+uint16_t reverse(uint16_t N, uint16_t n)    //calcola il reverse number di ogni intero n rispetto al numero massimo N
+{
+	uint16_t j, p = 0;
+  for(j = 1; j <= Log2(N); j++) {
+    if(n & (1 << (Log2(N) - j)))
+      p |= 1 << (j - 1);
+  }
+  return p;
+}
+
+void ordina(double complex* f1, uint16_t N)     //dispone gli elementi del vettore ordinandoli per reverse order
+{
+  double complex f2[MAX];
+  for(uint16_t i = 0; i < N; i++)
+    f2[i] = f1[reverse(N, i)];
+  for(uint16_t j = 0; j < N; j++)
+    f1[j] = f2[j];
+}
+uint16_t polarReal(uint16_t beta, uint16_t teta){
+	uint16_t real;
+	real = beta * cos(teta);
+
+	return real;
+}
+uint16_t polarImaginaria(uint16_t beta, uint16_t teta){
+	uint16_t imaginario;
+	imaginario = beta * cos(teta);
+
+	return imaginario;
+}
+void transform(double complex* f, uint16_t N)     //calcola il vettore trasformato
+{
+  ordina(f, N);    //dapprima lo ordina col reverse order
+  double complex W[N / 2]; //vettore degli zeri dell'unità.
+                            //Prima N/2-1 ma genera errore con ciclo for successivo
+                           //in quanto prova a copiare in una zona non allocata "W[N/2-1]"
+  W[1] = (polarReal(1., -2. * M_PI / N),polarImaginaria(1., -2. * M_PI / N));
+  W[0] = 1;
+  for(uint8_t i = 2; i < N / 2; i++)
+    W[i] = pow(W[1], i);
+  uint16_t n = 1;
+  uint16_t a = N / 2;
+  for(uint16_t j = 0; j < log2(N); j++) {
+    for(uint16_t i = 0; i < N; i++) {
+      if(!(i & n)) {
+        /*ad ogni step di raddoppiamento di n, vengono utilizzati gli indici */
+        /*'i' presi alternativamente a gruppetti di n, una volta si e una no.*/
+        double complex temp = f[i];
+        double complex Temp = W[(i * a) % (n * a)] * f[i + n];
+        f[i] = temp + Temp;
+        f[i + n] = temp - Temp;
+      }
+    }
+    n *= 2;
+    a = a / 2;
+  }
+}
+
+void FFT(double complex* f, uint16_t N, double d)
+{
+  transform(f, N);
+  for(uint16_t i = 0; i < N; i++)
+    f[i] *= d; //moltiplica il vettore per il passo in modo da avere il vettore trasformato effettivo
+}
+
+
+
+
+
+
+
+
 
 /**
   * @brief System Clock Configuration

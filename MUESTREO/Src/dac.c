@@ -55,7 +55,7 @@ void MX_DAC_Init(void)
 {
   DAC_ChannelConfTypeDef sConfig;
 
-    /**DAC Initialization 
+    /**DAC Initialization
     */
   hdac.Instance = DAC;
   if (HAL_DAC_Init(&hdac) != HAL_OK)
@@ -63,7 +63,7 @@ void MX_DAC_Init(void)
     _Error_Handler(__FILE__, __LINE__);
   }
 
-    /**DAC channel OUT2 config 
+    /**DAC channel OUT2 config
     */
   sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
