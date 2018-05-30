@@ -61,16 +61,31 @@
 LTDC_HandleTypeDef hltdc;
 uint32_t LECTURA;
 uint32_t msTicks;
-uint16_t buffer_adcIn[1000];
-uint16_t buffer_adcIn2[1000];
+uint16_t buffer_adcIn[250];
+uint16_t buffer_adcIn2[250];
+uint16_t buffer_adcIn3[250];
+uint16_t buffer_adcIn4[250];
+uint16_t buffer_adcIn5[250];
 
-uint16_t buffer_adcOut[1000];
-uint16_t buffer_adcOut2[1000];
+uint16_t buffer_adcOut[250];
+uint16_t buffer_adcOut2[250];
+uint16_t buffer_adcOut3[250];
+uint16_t buffer_adcOut4[250];
+uint16_t buffer_adcOut5[250];
 
 uint8_t posicion_buffer_in=0u;
 uint8_t posicion_buffer_in2=0u;
+uint8_t posicion_buffer_in3=0u;
+uint8_t posicion_buffer_in4=0u;
+uint8_t posicion_buffer_in5=0u;
+
 uint8_t posicion_buffer_out=0u;
 uint8_t posicion_buffer_out2=0u;
+uint8_t posicion_buffer_out3=0u;
+uint8_t posicion_buffer_out4=0u;
+uint8_t posicion_buffer_out5=0u;
+uint8_t posicion_buffer_out6=0u;
+
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -166,10 +181,11 @@ void Muestra(void)
 
 			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
 			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut[posicion_buffer_out]);
-			buffer_adcIn[posicion_buffer_in]=LECTURA;
+
 
 			HAL_ADC_Start(&hadc1);
 			LECTURA=HAL_ADC_GetValue(&hadc1);
+			buffer_adcIn[posicion_buffer_in]=LECTURA;
 
 			posicion_buffer_out++;
 			posicion_buffer_in++;
@@ -184,15 +200,63 @@ void Muestra(void)
 			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
 			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut2[posicion_buffer_out2]);
 
-			buffer_adcIn2[posicion_buffer_in2]=LECTURA;
 
 			HAL_ADC_Start(&hadc1);
 			LECTURA=HAL_ADC_GetValue(&hadc1);
+			buffer_adcIn2[posicion_buffer_in2]=LECTURA;
 
 			posicion_buffer_in2++;
 			posicion_buffer_out2++;
 
 			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
+		}
+		else if(posicion_buffer_in2>=250 && posicion_buffer_in3<250)
+		{
+			buffer_adcOut3[posicion_buffer_in3]=buffer_adcIn3[posicion_buffer_in3];
+
+			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut3[posicion_buffer_out3]);
+
+
+			HAL_ADC_Start(&hadc1);
+			LECTURA=HAL_ADC_GetValue(&hadc1);
+			buffer_adcIn3[posicion_buffer_in3]=LECTURA;
+
+			posicion_buffer_in3++;
+			posicion_buffer_out3++;
+
+			HAL_GPIO_TogglePin(GPIOG, LD4_Pin);
+		}
+		else if(posicion_buffer_in3>=250 && posicion_buffer_in4<250)
+		{
+			buffer_adcOut4[posicion_buffer_in4]=buffer_adcIn4[posicion_buffer_in4];
+
+			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut4[posicion_buffer_out4]);
+
+
+			HAL_ADC_Start(&hadc1);
+			LECTURA=HAL_ADC_GetValue(&hadc1);
+			buffer_adcIn4[posicion_buffer_in4]=LECTURA;
+
+			posicion_buffer_in4++;
+			posicion_buffer_out4++;
+		}
+		else if(posicion_buffer_in4>=250 && posicion_buffer_in5<250)
+		{
+			buffer_adcOut5[posicion_buffer_in5]=buffer_adcIn5[posicion_buffer_in5];
+
+			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
+			HAL_DAC_SetValue(&hdac,DAC_CHANNEL_2,DAC_ALIGN_12B_R,buffer_adcOut5[posicion_buffer_out5]);
+
+
+			HAL_ADC_Start(&hadc1);
+			LECTURA=HAL_ADC_GetValue(&hadc1);
+			buffer_adcIn5[posicion_buffer_in5]=LECTURA;
+
+			posicion_buffer_in5++;
+			posicion_buffer_out5++;
+
 		}
 		else
 		{
@@ -200,6 +264,14 @@ void Muestra(void)
 			posicion_buffer_in=0;
 			posicion_buffer_out2=0;
 			posicion_buffer_in2=0;
+			posicion_buffer_out3=0;
+			posicion_buffer_in3=0;
+			posicion_buffer_out4=0;
+			posicion_buffer_in4=0;
+			posicion_buffer_out5=0;
+			posicion_buffer_in5=0;
+
+
 		/*	if(posicion_buffer_out<250)
 			{
 			HAL_DAC_Start(&hdac,DAC_CHANNEL_2);
