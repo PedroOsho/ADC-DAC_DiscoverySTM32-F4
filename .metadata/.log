@@ -261,3 +261,6 @@ java.net.UnknownHostException: sumba.atollic.com
 
 !ENTRY TrueSTUDIO 4 0 2018-05-28 18:36:06.883
 !MESSAGE Failed to get version information: No contact with license server: Failed to contact Atollic.
+
+!ENTRY org.eclipse.ui 4 4 2018-05-29 21:45:59.581
+!MESSAGE Referenced part does not exist yet: org.eclipse.ui.views.TaskList.
